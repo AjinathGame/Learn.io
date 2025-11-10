@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import User from "../models/user.model.js";
 import responder from "../utils/responder.js"
+import jwt from "jsonwebtoken";
 
 
 const postSignup = async (req, res) => {
@@ -44,5 +45,38 @@ const postSignup = async (req, res) => {
     }
 }
 
+const postLogin = async (req, res) => {
+    let { email, password } = req.body;
 
-export { postSignup }
+    if (!email || !password) {
+        return responder(res, 406, null, "to login email & password is required", false);
+    }
+
+    let findedUser = await User.findOne({ email: email });
+
+    if (!findedUser) {
+        return responder(res, 404, null, "user not found", false);
+    }
+
+    let isPassMatch = await bcrypt.compare(password, findedUser.password);
+
+    if (!isPassMatch) {
+        return responder(res, 404, null, "invalid password", false);
+
+    }
+      
+    let token = jwt.sign({
+        id:findedUser._id,
+        name:findedUser.name,
+        email:findedUser.email
+    },process.env.JWT_SECRET)
+
+    req.session.token = token;
+
+    return responder(res, 200, null, "login successfully", true);
+    
+
+}
+
+
+export { postSignup , postLogin }
