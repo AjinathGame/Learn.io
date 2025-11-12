@@ -33,15 +33,14 @@ import connectDB from './config/connectDB.js';
 import responder from './utils/responder.js'; 
 import { postLogin, postSignup } from './controller/auth.control.js';
 import verifyToken from './middleware/verifyJWT.js';
+import { ganarateRoadmap } from './controller/roadmapControl.js';
+
 
 
 app.post("/signup",postSignup);
 app.post("/login",postLogin);
 
-app.get("/dashboard",verifyToken,(req,res)=>{
-    console.log(req.user.id)
-    return responder(res, 200, null, "dashboard", true);
-})
+app.post("/genrate",verifyToken,ganarateRoadmap)
 
 app.get("/health", (req, res) => {
     return responder(res, 200, null, "Server is healthy", true);
